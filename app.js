@@ -1,5 +1,6 @@
 var express         = require("express"),
     passport        = require("passport"),
+    mongoose        = require("./mongoose"),
     LocalStrategy   = require("passport-local"),
     LocalMongoose   = require("passport-local-mongoose"),
     bodyParser      = require("body-parser"),
@@ -31,17 +32,15 @@ passport.use(new LocalStrategy(User.authenticate()));
 passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
 
-var mongoose = require("mongoose");
-mongoose.set("useNewUrlParser", true);
-mongoose.set("useFindAndModify", false);
-mongoose.set("useCreateIndex", true);
-mongoose.set("useUnifiedTopology", true);
-mongoose.connect("mongodb://localhost:27017/test");
-
 var db = mongoose.connection;
 db.on("error", console.error.bind(console, "connection error:"));
 db.once("open", function(){
    console.log("Mongoose connected.") 
+});
+
+app.use(function(req,res,next){
+    req.db = db;
+    next();
 });
 
 app.use("/", home);
